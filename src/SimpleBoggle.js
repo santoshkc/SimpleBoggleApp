@@ -9,16 +9,33 @@ export class SimpleBoggleGame extends React.Component {
 
         this.state = {
             score: 0,
-            board: [["x","y","z","5"],
-                    ["z","y","z","u"],
-                    ["x","n","z","a"],
-                    ["x","y","m","a"]
-                    ],  
+            board: this.getInitializedBoard(4),
             matchedWords : [],
             dictionary: ["abc,def","xyz","car","rat"],
             inputWord: "",
             errorMessage: ""
         }
+    }
+
+    getInitializedBoard(sizeOfGrid) {
+
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const randomizedAlphabetArray = alphabet.split('').sort( () => (Math.random()-0.5));
+        
+        let numbers = [];
+
+        for (let row = 0; row < sizeOfGrid; row++) {
+            let subArray = Array(sizeOfGrid);
+
+            for(let column = 0; column < sizeOfGrid; column++) {
+                
+                let randomChar = randomizedAlphabetArray[row*sizeOfGrid + column];
+
+                subArray[column] = randomChar;
+            }
+            numbers.push(subArray);
+        }
+        return numbers;
     }
 
     render = () => {
@@ -186,9 +203,13 @@ class BoardCell extends Component {
     }
 
     render = () => {
+        const style = {
+            width : "40px",
+            height : "40px"
+        }
         const value = this.props.character
         return (
-            <button className = "m-2 p-2" >{value}</button>
+            <button style = {style} className = "btn btn-light m-1 p-1" >{value}</button>
         )
     }
 }
