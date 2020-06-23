@@ -29,30 +29,30 @@ export class SimpleBoggleGame extends React.Component {
 
         for(let i = 0; i < wordToCheck.length -1 ; i++) {
             let currentChar = wordToCheck.charAt(i)
-            let [currentCharRow,currentCharColumn] = this.indexFromCharacter(currentChar);
-            
             // could not find character in the board
-            if(!currentCharRow )
-                return false
-            let nextChar = wordToCheck.charAt(i+1)
-            let [nextCharRow,nextCharColumn] = this.indexFromCharacter(nextChar)
-
-            // could not find next character in the board
-            if(!nextCharRow)
+            let indexArray = this.indexFromCharacter(currentChar);
+            if(!indexArray) {
                 return false;
-
+            }
+            let [currentCharRow,currentCharColumn] = indexArray;
+            
+            let nextChar = wordToCheck.charAt(i+1)
+            // could not find next character in the board
+            let indexArray2 = this.indexFromCharacter(nextChar)
+            if(!indexArray2) {
+                return false;
+            }
+            let [nextCharRow,nextCharColumn] = indexArray2;
 
             let neighbours = this.getNearestNeighbour(currentCharRow,currentCharColumn)
 
-            console.log(currentChar,nextChar,neighbours)
-
-            var exists = neighbours.some( (value,index) => {
+            var existsInNeighbourhood = neighbours.some( (value,index) => {
                 let [r,c] = value
                 return  r === nextCharRow && c === nextCharColumn
             })
 
             // next character not in neighbour
-            if(!exists)
+            if(!existsInNeighbourhood)
                 return false
         }
         return true
@@ -191,7 +191,7 @@ export class SimpleBoggleGame extends React.Component {
                                 }/>
                                 <input type = "submit" value = "Check"/>
                             </div>
-                            <div className = "row m-1">
+                            <div className = {"row m-1" + this.state.errorMessage.length > 0 ? "bg-warn": ""}>
                                 {this.state.errorMessage}
                             </div>
                         </form>
