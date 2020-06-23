@@ -13,8 +13,116 @@ export class SimpleBoggleGame extends React.Component {
             matchedWords : [],
             dictionary: ["abc,def","xyz","car","rat"],
             inputWord: "",
-            errorMessage: ""
+            errorMessage: "",
+            timeRemaining : 120,
         }
+        //this.printNearestNeightbour()
+    }
+
+    componentDidMount  = () => {
+        this.runTimer()
+    }
+
+    checkIfMoveIsValid = (word) => {
+
+        let wordToCheck = word.toLowerCase() 
+
+        for(let i = 0; i < wordToCheck.length -1 ; i++) {
+            let currentChar = wordToCheck.charAt(i)
+            let [currentCharRow,currentCharColumn] = this.indexFromCharacter(currentChar);
+            
+            // could not find character in the board
+            if(!currentCharRow )
+                return false
+            let nextChar = wordToCheck.charAt(i+1)
+            let [nextCharRow,nextCharColumn] = this.indexFromCharacter(nextChar)
+
+            // could not find next character in the board
+            if(!nextCharRow)
+                return false;
+
+
+            let neighbours = this.getNearestNeighbour(currentCharRow,currentCharColumn)
+
+            console.log(currentChar,nextChar,neighbours)
+
+            var exists = neighbours.some( (value,index) => {
+                let [r,c] = value
+                return  r === nextCharRow && c === nextCharColumn
+            })
+
+            // next character not in neighbour
+            if(!exists)
+                return false
+        }
+        return true
+    }
+
+    indexFromCharacter = (character) => {
+        const sizeOfBoardRow = 4;
+        for(let i = 0; i < sizeOfBoardRow; i++) {
+            for(let j = 0; j < sizeOfBoardRow; j++) {
+                let value = this.state.board[i][j]
+                if(value.toLowerCase() === character)
+                    return [i,j]
+            }
+        }
+        return null;
+        // return this.state.board.find( (rowArray,index1) =>
+        //     rowArray.find((value,index2) => {
+        //         return value === character ? [index1,index2] : null
+        //     })
+        // )
+    }
+
+    printNearestNeightbour = () => {
+
+        this.state.board.map( (v,i) => 
+            v.map( (x, j) =>
+            {
+                console.log(`[${i},${j}, ${this.rowColumnToIndex(i,j)}] => ${this.getNearestNeighbour(i,j)}`)
+            }
+            )
+        )
+    }
+
+    indexToRowColumn = (index) => {
+        const sizeOfBoardRow = 4;
+        let row = Math.floor( (index+1)/sizeOfBoardRow)
+        let column = index%sizeOfBoardRow
+        return [row,column]
+    }
+
+    rowColumnToIndex = (row,column) => {
+        const sizeOfBoardRow = 4
+        return row*sizeOfBoardRow + column
+    }
+
+    getNearestNeighbour =  (row,column) => {
+        const sizeOfBoardRow = 4;
+
+        let result = []
+
+        for(let i = row-1; i <= row+1; i++) {
+            if(i < 0 || i >  (sizeOfBoardRow - 1)) {
+                continue;
+            }
+        
+            for(let j = column-1; j <= column+1; j++) {
+                if(j < 0 || j > sizeOfBoardRow - 1) {
+                    continue;
+                }
+
+                if(i === row && j === column) {
+                    continue;
+                } else {
+                    let item = [i,j]
+                    //item = this.rowColumnToIndex(i,j)
+                    result.push(item)
+                }
+            }
+        }
+        return result
     }
 
     getInitializedBoard(sizeOfGrid) {
@@ -38,11 +146,27 @@ export class SimpleBoggleGame extends React.Component {
         return numbers;
     }
 
+    runTimer = () => {
+
+        if(this.state.timeRemaining > 0) {        
+            
+            let timerId = setInterval( () => {
+                let currentTimerValue = this.state.timeRemaining;
+
+                if(currentTimerValue <= 0) {
+                    clearInterval(timerId)
+                    this.setState({timeRemaining: 0})
+                }
+                this.setState({timeRemaining: currentTimerValue - 1})
+                },1000);
+        }
+    }
+
     render = () => {
         return (
             <div className = "container-fluid">
                 <div className = "row bg-info p-2">
-                    <BannerComponent score = {this.state.score} timerText = {"1:00"}/>
+                    <BannerComponent score = {this.state.score} timerText = {this.state.timeRemaining}/>
                 </div>
                 <div className = "row p-2 m-2">
                     <div id = "board" className = "col-4">
@@ -138,6 +262,11 @@ export class SimpleBoggleGame extends React.Component {
         if(wordEntered.length < 3)
         {
             this.setInvalidWordError("Word should be of length 3 or more")
+            return
+        }
+
+        if(this.checkIfMoveIsValid(wordEntered) == false) {
+            this.setInvalidWordError("Word move is not valid")
             return
         }
         this.addWordToMatchedList(wordEntered)
