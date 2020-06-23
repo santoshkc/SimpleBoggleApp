@@ -8,21 +8,23 @@ export class SimpleBoggleGame extends React.Component {
         super(props)
 
         this.state = {
-            score: 100,
+            score: 0,
             board: [["x","y","z","5"],
                     ["z","y","z","u"],
                     ["x","n","z","a"],
                     ["x","y","m","a"]
                     ],  
-            matchedWords : ["abc"],
-            dictionary: ["abc,def","xyz","car","rat"]
+            matchedWords : [],
+            dictionary: ["abc,def","xyz","car","rat"],
+            inputWord: "",
+            errorMessage: ""
         }
     }
 
     render = () => {
         return (
             <div className = "container-fluid">
-                <div className = "row bg-info text-center p-2">
+                <div className = "row bg-info p-2">
                     <BannerComponent score = {this.state.score} timerText = {"1:00"}/>
                 </div>
                 <div className = "row p-2 m-2">
@@ -33,11 +35,95 @@ export class SimpleBoggleGame extends React.Component {
                         <MatchedWordListComponent words = {this.state.matchedWords}/>
                     </div>
                 </div>
-                <div id = "gameInput">
-                    <input type = "text" />
+                <div id = "gameInput" className = "row m-2 p-2">
+                        <form onSubmit = {this.wordValidation}>
+                            <div className = "row">
+                                <input type = "text" onChange = { 
+                                    (event) => {
+                                        let typedWord = event.target.value;
+                                        if(typedWord) {
+                                            typedWord = typedWord.trim().toLowerCase()
+                                            if(typedWord.length > 0)
+                                                this.setState({inputWord:  typedWord})
+                                        }
+                                    }
+                                }/>
+                                <input type = "submit" value = "Check"/>
+                            </div>
+                            <div className = "row m-1">
+                                {this.state.errorMessage}
+                            </div>
+                        </form>
                 </div>
             </div>
         )
+    }
+
+    addWordToMatchedList = (word) => {
+        let wordToCheck = word.toLowerCase()
+        
+        if(this.alreadyInMatchedWordsList(wordToCheck))
+        {
+            this.setState({
+                errorMessage : "Word already added to matched list",
+            })
+            return
+        }
+
+        if(this.availableInDictionary(wordToCheck)) {
+            let newScore = Number(this.state.score) + wordToCheck.length
+            let newMatchedWords = [...this.state.matchedWords,wordToCheck]
+            this.setState({
+                matchedWords: newMatchedWords,
+                errorMessage: "",
+                inputWord : "",
+                score : newScore,
+            })
+
+        } else {
+            this.setState({
+                errorMessage : "Word not found in dictionary",
+            })
+        }
+    }
+
+    alreadyInMatchedWordsList(word) {
+        return this.state.matchedWords.includes(word)
+    }
+
+    availableInDictionary = (word) => {
+        return this.state.dictionary.includes(word)
+    }
+
+    setInvalidWordError = (errorText) => {
+        this.setState({
+            errorMessage: errorText,
+            inputWord: "",
+        })
+    }
+
+    wordValidation = (event) => {
+        event.preventDefault()
+        let wordEntered = this.state.inputWord;
+
+        if(!wordEntered) {
+            this.setInvalidWordError("Word should not be empty.")
+            return
+        }
+
+        wordEntered = wordEntered.trim()
+
+        if(wordEntered.length === 0) {
+            this.setInvalidWordError("Word should not be whitespace only.")
+            return
+        }
+
+        if(wordEntered.length < 3)
+        {
+            this.setInvalidWordError("Word should be of length 3 or more")
+            return
+        }
+        this.addWordToMatchedList(wordEntered)
     }
 }
 
@@ -49,7 +135,7 @@ class BannerComponent extends Component {
     render = () => {
 
         return (
-            <div id = "banner" className = "container-fluid">
+            <div id = "banner" className = "container-fluid text-center">
                 <div className = "row text-center">
                     <h1>Welcome to Simple Boggle</h1>
                 </div>
@@ -73,12 +159,6 @@ class BoardComponent extends Component {
     }
 
     render = () => {
-
-        // const array = [["x","y","z","a"],
-        //     ["x","y","z","a"],
-        //     ["x","y","z","a"],
-        //     ["x","y","z","a"]
-        // ];
         const array  = this.props.board;
         const rowSize = 4;
 
