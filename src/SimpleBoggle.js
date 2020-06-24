@@ -9,14 +9,13 @@ export class SimpleBoggleGame extends React.Component {
 
         this.state = {
             score: 0,
-            board: this.getInitializedBoard(4),
+            board: this.getInitializedBoardWithDuplicateCharacter(4),
             matchedWords : [],
             dictionary: ["abc,def","xyz","car","rat"],
             inputWord: "",
             errorMessage: "",
             timeRemaining : 120,
         }
-        //this.printNearestNeightbour()
     }
 
     componentDidMount  = () => {
@@ -25,7 +24,9 @@ export class SimpleBoggleGame extends React.Component {
 
     checkIfMoveIsValid = (word) => {
 
-        let wordToCheck = word.toLowerCase() 
+        let wordToCheck = word.toLowerCase()
+        
+        let alreadyUsedCells = []
 
         for(let i = 0; i < wordToCheck.length -1 ; i++) {
             let currentChar = wordToCheck.charAt(i)
@@ -35,6 +36,13 @@ export class SimpleBoggleGame extends React.Component {
                 return false;
             }
             let [currentCharRow,currentCharColumn] = indexArray;
+
+            // this will check if same cell is used more than once
+            let actualArrayIndex = this.rowColumnToIndex(...indexArray)
+            if(alreadyUsedCells.includes(actualArrayIndex)) {
+                return false;
+            }
+            alreadyUsedCells.push(actualArrayIndex)
             
             let nextChar = wordToCheck.charAt(i+1)
             // could not find next character in the board
@@ -43,6 +51,16 @@ export class SimpleBoggleGame extends React.Component {
                 return false;
             }
             let [nextCharRow,nextCharColumn] = indexArray2;
+
+            // check whether last cell is repeated
+            if(i+1 == wordToCheck.length - 1) {
+                // this will check if same cell is used more than once
+                let actualArrayIndex = this.rowColumnToIndex(...indexArray2)
+                if(alreadyUsedCells.includes(actualArrayIndex)) {
+                    return false;
+                }
+                alreadyUsedCells.push(actualArrayIndex)
+            }
 
             let neighbours = this.getNearestNeighbour(currentCharRow,currentCharColumn)
 
@@ -125,6 +143,27 @@ export class SimpleBoggleGame extends React.Component {
         return result
     }
 
+    getInitializedBoardWithDuplicateCharacter(sizeOfGrid) {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        
+        let numbers = [];
+
+        for (let row = 0; row < sizeOfGrid; row++) {
+            let subArray = Array(sizeOfGrid);
+
+            for(let column = 0; column < sizeOfGrid; column++) {
+                
+                let rnd = Math.floor(Math.random()*sizeOfGrid*sizeOfGrid)
+                let randomChar = alphabet[rnd];
+
+                subArray[column] = randomChar;
+            }
+            numbers.push(subArray);
+        }
+        return numbers;
+
+    }
+
     getInitializedBoard(sizeOfGrid) {
 
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -200,6 +239,29 @@ export class SimpleBoggleGame extends React.Component {
         )
     }
 
+    httpReqeustTest = (wordToCheck)  => {
+
+        var details = {
+            'typedText': wordToCheck,
+        };
+        
+        var formBody = [];
+        for (var property in details) {
+          var encodedKey = encodeURIComponent(property);
+          var encodedValue = encodeURIComponent(details[property]);
+          formBody.push(encodedKey + "=" + encodedValue);
+        }
+        formBody = formBody.join("&");
+
+        fetch("http://localhost:8080/api/word",{
+            method : 'POST',
+            headers: {'Content-Type':'application/x-www-form-urlencoded'},
+            body: formBody
+        })
+        .then(response => response.json())
+        .then(data => console.log(typeof data,data));
+    }
+
     addWordToMatchedList = (word) => {
         let wordToCheck = word.toLowerCase()
         
@@ -210,6 +272,8 @@ export class SimpleBoggleGame extends React.Component {
             })
             return
         }
+
+        //this.httpReqeustTest(wordToCheck)
 
         if(this.availableInDictionary(wordToCheck)) {
             let newScore = Number(this.state.score) + wordToCheck.length
