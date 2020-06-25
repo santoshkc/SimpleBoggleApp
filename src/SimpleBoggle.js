@@ -14,7 +14,7 @@ export class SimpleBoggleGame extends React.Component {
             matchedWords : [],
             inputWord: "",
             errorMessage: "",
-            timeRemaining : 120,
+            timeRemaining : 180,
         }
     }
 
@@ -195,6 +195,7 @@ export class SimpleBoggleGame extends React.Component {
                 if(currentTimerValue <= 0) {
                     clearInterval(timerId)
                     this.setState({timeRemaining: 0})
+                    return
                 }
                 this.setState({timeRemaining: currentTimerValue - 1})
                 },1000);
@@ -220,6 +221,8 @@ export class SimpleBoggleGame extends React.Component {
                             <div className = "row">
                                 <input type = "text" onChange = { 
                                     (event) => {
+                                        if(this.state.timeRemaining <= 0)
+                                            return
                                         let typedWord = event.target.value;
                                         if(typedWord) {
                                             typedWord = typedWord.trim().toLowerCase()
@@ -324,6 +327,12 @@ export class SimpleBoggleGame extends React.Component {
 
     wordValidation = async (event) => {
         event.preventDefault()
+
+        if(this.state.timeRemaining <= 0) {
+            this.setInvalidWordError("Time up")
+            return
+        }
+
         let wordEntered = this.state.inputWord;
 
         if(!wordEntered) {
