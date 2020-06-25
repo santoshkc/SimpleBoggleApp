@@ -1,6 +1,7 @@
 import React,{Component} from 'react'
 
 import 'bootstrap/dist/css/bootstrap.css'
+import {RemoteServer} from './ServerInfo'
 
 export class SimpleBoggleGame extends React.Component {
 
@@ -9,9 +10,8 @@ export class SimpleBoggleGame extends React.Component {
 
         this.state = {
             score: 0,
-            board: this.getInitializedBoardWithDuplicateCharacter(4),
+            board: this.getInitializedBoard(4),
             matchedWords : [],
-            dictionary: ["abc,def","xyz","car","rat"],
             inputWord: "",
             errorMessage: "",
             timeRemaining : 120,
@@ -22,7 +22,7 @@ export class SimpleBoggleGame extends React.Component {
         this.runTimer()
     }
 
-    checkIfMoveIsValid = (word) => {
+    checkIfMoveIsValid = async (word) => {
 
         let wordToCheck = word.toLowerCase()
         
@@ -53,7 +53,7 @@ export class SimpleBoggleGame extends React.Component {
             let [nextCharRow,nextCharColumn] = indexArray2;
 
             // check whether last cell is repeated
-            if(i+1 == wordToCheck.length - 1) {
+            if(i+1 === wordToCheck.length - 1) {
                 // this will check if same cell is used more than once
                 let actualArrayIndex = this.rowColumnToIndex(...indexArray2)
                 if(alreadyUsedCells.includes(actualArrayIndex)) {
@@ -239,7 +239,7 @@ export class SimpleBoggleGame extends React.Component {
         )
     }
 
-    httpReqeustTest = (wordToCheck)  => {
+    requestToServer = async (wordToCheck)  => {
 
         var details = {
             'typedText': wordToCheck,
@@ -253,16 +253,31 @@ export class SimpleBoggleGame extends React.Component {
         }
         formBody = formBody.join("&");
 
-        fetch("http://localhost:8080/api/word",{
-            method : 'POST',
-            headers: {'Content-Type':'application/x-www-form-urlencoded'},
-            body: formBody
-        })
-        .then(response => response.json())
-        .then(data => console.log(typeof data,data));
+        //await new Promise(resolve => setTimeout(resolve,10000))
+
+        let response = await fetch(RemoteServer,
+            {
+                method : 'POST',
+                headers: {'Content-Type':'application/x-www-form-urlencoded'},
+                body: formBody
+            }
+        ).catch(error => {
+            alert(error)
+            console.log(error)
+        });
+
+        if(response && response.status === 200) {
+            let result = await response.json()
+            let wordFound = result['WordFound'];
+            if(wordFound == true) {
+                return true
+            }
+        }
+        return false;
     }
 
-    addWordToMatchedList = (word) => {
+    addWordToMatchedList = async (word) => {
+
         let wordToCheck = word.toLowerCase()
         
         if(this.alreadyInMatchedWordsList(wordToCheck))
@@ -273,9 +288,8 @@ export class SimpleBoggleGame extends React.Component {
             return
         }
 
-        //this.httpReqeustTest(wordToCheck)
-
-        if(this.availableInDictionary(wordToCheck)) {
+        let wordFound = await this.availableInDictionary(wordToCheck)
+        if(wordFound) {
             let newScore = Number(this.state.score) + wordToCheck.length
             let newMatchedWords = [...this.state.matchedWords,wordToCheck]
             this.setState({
@@ -296,8 +310,9 @@ export class SimpleBoggleGame extends React.Component {
         return this.state.matchedWords.includes(word)
     }
 
-    availableInDictionary = (word) => {
-        return this.state.dictionary.includes(word)
+    availableInDictionary = async (word) => {
+        let wordInDictionary = await this.requestToServer(word)
+        return wordInDictionary
     }
 
     setInvalidWordError = (errorText) => {
@@ -307,7 +322,7 @@ export class SimpleBoggleGame extends React.Component {
         })
     }
 
-    wordValidation = (event) => {
+    wordValidation = async (event) => {
         event.preventDefault()
         let wordEntered = this.state.inputWord;
 
@@ -329,11 +344,11 @@ export class SimpleBoggleGame extends React.Component {
             return
         }
 
-        if(this.checkIfMoveIsValid(wordEntered) == false) {
+        if( await this.checkIfMoveIsValid(wordEntered) === false) {
             this.setInvalidWordError("Word move is not valid")
             return
         }
-        this.addWordToMatchedList(wordEntered)
+        await this.addWordToMatchedList(wordEntered)
     }
 }
 
