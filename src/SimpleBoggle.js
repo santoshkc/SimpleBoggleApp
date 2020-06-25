@@ -25,9 +25,6 @@ export class SimpleBoggleGame extends React.Component {
     }
 
     getCurrentScore = () => {
-        if(!this.state.matchedWords || this.state.matchedWords.length < 1)
-            return 0
-
         let sum = 0;
         for(let i = 0; i < this.state.matchedWords.length; i++) {
             sum += this.state.matchedWords[i].length
