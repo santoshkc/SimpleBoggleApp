@@ -70,8 +70,11 @@ export class SimpleBoggleGame extends React.Component {
                             <div className = "row">
                                 <input type = "text" onChange = { 
                                     (event) => {
-                                        if(this.state.timeRemaining <= 0)
+                                        if(this.state.timeRemaining <= 0) {
+                                            event.target.value = ""
+                                            this.setState({errorMessage : "Time up"})
                                             return
+                                        }
                                         let typedWord = event.target.value;
                                         if(typedWord) {
                                             typedWord = typedWord.trim().toLowerCase()
@@ -83,7 +86,7 @@ export class SimpleBoggleGame extends React.Component {
                                 <input type = "submit" value = "Check"/>
                             </div>
                             <div className = {"row m-1" + this.state.errorMessage.length > 0 ? "bg-warn": ""}>
-                                {this.state.errorMessage}
+                                <strong>{this.state.errorMessage}</strong>
                             </div>
                         </form>
                 </div>
