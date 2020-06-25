@@ -3,6 +3,8 @@ import React,{Component} from 'react'
 import 'bootstrap/dist/css/bootstrap.css'
 import {RemoteServer} from './ServerInfo'
 
+const sizeOfBoardRow = 4;
+
 export class SimpleBoggleGame extends React.Component {
 
     constructor(props) {
@@ -10,7 +12,7 @@ export class SimpleBoggleGame extends React.Component {
 
         this.state = {
             score: 0,
-            board: this.getInitializedBoard(4),
+            board: this.getInitializedBoard(sizeOfBoardRow),
             matchedWords : [],
             inputWord: "",
             errorMessage: "",
@@ -20,6 +22,17 @@ export class SimpleBoggleGame extends React.Component {
 
     componentDidMount  = () => {
         this.runTimer()
+    }
+
+    getCurrentScore = () => {
+        if(!this.state.matchedWords || this.state.matchedWords.length < 1)
+            return 0
+
+        let sum = 0;
+        for(let i = 0; i < this.state.matchedWords.length; i++) {
+            sum += this.state.matchedWords[i].length
+        }
+        return sum
     }
 
     checkIfMoveIsValid = async (word) => {
@@ -77,7 +90,6 @@ export class SimpleBoggleGame extends React.Component {
     }
 
     indexFromCharacter = (character) => {
-        const sizeOfBoardRow = 4;
         for(let i = 0; i < sizeOfBoardRow; i++) {
             for(let j = 0; j < sizeOfBoardRow; j++) {
                 let value = this.state.board[i][j]
@@ -105,20 +117,16 @@ export class SimpleBoggleGame extends React.Component {
     }
 
     indexToRowColumn = (index) => {
-        const sizeOfBoardRow = 4;
         let row = Math.floor( (index+1)/sizeOfBoardRow)
         let column = index%sizeOfBoardRow
         return [row,column]
     }
 
     rowColumnToIndex = (row,column) => {
-        const sizeOfBoardRow = 4
         return row*sizeOfBoardRow + column
     }
 
     getNearestNeighbour =  (row,column) => {
-        const sizeOfBoardRow = 4;
-
         let result = []
 
         for(let i = row-1; i <= row+1; i++) {
@@ -206,13 +214,13 @@ export class SimpleBoggleGame extends React.Component {
         return (
             <div className = "container-fluid">
                 <div className = "row bg-info p-2">
-                    <BannerComponent score = {this.state.score} timerText = {this.state.timeRemaining}/>
+                    <BannerComponent score = {this.getCurrentScore()} timerText = {this.state.timeRemaining}/>
                 </div>
                 <div className = "row p-2 m-2">
                     <div id = "board" className = "col-4">
                         <BoardComponent board = {this.state.board}/>
                     </div>
-                    <div id = "wordList" className = "col">
+                    <div id = "wordList" className = "col-3 m-2">
                         <MatchedWordListComponent words = {this.state.matchedWords}/>
                     </div>
                 </div>
@@ -293,13 +301,11 @@ export class SimpleBoggleGame extends React.Component {
 
         let wordFound = await this.availableInDictionary(wordToCheck)
         if(wordFound) {
-            let newScore = Number(this.state.score) + wordToCheck.length
             let newMatchedWords = [...this.state.matchedWords,wordToCheck]
             this.setState({
                 matchedWords: newMatchedWords,
                 errorMessage: "",
                 inputWord : "",
-                score : newScore,
             })
 
         } else {
@@ -439,14 +445,27 @@ class MatchedWordListComponent extends Component {
 
     render = () => {
         return (
-            <ul>
-                {
-                this.props.words.map(
-                (value,index) => {
-                    return <li key = {index}>{value}</li>
-                }
-            )}
-            </ul>
+            <div className = "table table-sm table-bordered table-striped">
+                <table>
+                    <thead>
+                        <th>Word</th>
+                        <th>Score</th>
+                    </thead>
+                    <tbody>
+                        {
+                            this.props.words.map(
+                                (value,index) => {
+                                return (<tr key = {index}>
+                                            <td>{value}</td>
+                                            <td>{value.length}</td>
+                                        </tr>)
+                            }
+                        )}
+                    </tbody>
+
+                </table>
+
+            </div>
             )
     }
 }
