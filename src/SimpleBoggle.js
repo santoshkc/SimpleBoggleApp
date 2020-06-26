@@ -53,19 +53,21 @@ export class SimpleBoggleGame extends React.Component {
 
     render = () => {
         return (
-            <div className = "container-fluid">
+            <div className = "container">
                 <div className = "row bg-info p-2">
-                    <BannerComponent score = {this.getCurrentScore()} timerText = {this.state.timeRemaining}/>
+                    <div className = "col-6">
+                        <BannerComponent score = {this.getCurrentScore()} timerText = {this.state.timeRemaining}/>
+                    </div>
                 </div>
-                <div className = "row p-2 m-2">
+                <div className = "row p-2 mt-2">
                     <div id = "board" className = "col-4">
                         <BoardComponent board = {this.state.gameBoard.board}/>
                     </div>
-                    <div id = "wordList" className = "col-3 m-2">
+                    <div id = "wordList" className = "col-3 ml-2">
                         <MatchedWordListComponent words = {this.state.matchedWords}/>
                     </div>
                 </div>
-                <div id = "gameInput" className = "row m-2 p-2">
+                <div id = "gameInput" className = "row mt-2 p-2">
                         <form onSubmit = {this.wordValidation}>
                             <div className = "row">
                                 <input type = "text" onChange = { 
@@ -100,21 +102,24 @@ export class SimpleBoggleGame extends React.Component {
             'typedText': wordToCheck,
         };
         
-        var formBody = [];
-        for (var property in details) {
-          var encodedKey = encodeURIComponent(property);
-          var encodedValue = encodeURIComponent(details[property]);
-          formBody.push(encodedKey + "=" + encodedValue);
-        }
-        formBody = formBody.join("&");
+        // var formBody = [];
+        // for (var property in details) {
+        //   var encodedKey = encodeURIComponent(property);
+        //   var encodedValue = encodeURIComponent(details[property]);
+        //   formBody.push(encodedKey + "=" + encodedValue);
+        // }
+        // formBody = formBody.join("&");
 
         //await new Promise(resolve => setTimeout(resolve,10000))
 
         let response = await fetch(RemoteServer,
             {
-                method : 'POST',
-                headers: {'Content-Type':'application/x-www-form-urlencoded'},
-                body: formBody
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                cors: "cors",
+                body: JSON.stringify(details),
             }
         ).catch(error => {
             alert(error)
@@ -228,7 +233,7 @@ class BannerComponent extends Component {
                         Score : {this.props.score}
                     </div>
                     <div className = "col p-2">
-                        Time Remaining : {this.props.timerText}
+                        Time Remaining : {this.props.timerText} Seconds
                     </div>
                 </div>
             </div>
@@ -289,27 +294,29 @@ class MatchedWordListComponent extends Component {
 
     render = () => {
         return (
-            <div className = "table table-sm table-bordered table-striped">
-                <table>
-                    <thead>
-                        <th>Word</th>
-                        <th>Score</th>
-                    </thead>
-                    <tbody>
-                        {
-                            this.props.words.map(
-                                (value,index) => {
-                                return (<tr key = {index}>
-                                            <td>{value}</td>
-                                            <td>{value.length}</td>
-                                        </tr>)
-                            }
-                        )}
-                    </tbody>
+                <div className = "container-fluid">
+                    <div className = "bg-info text-center font-weight-bold">
+                        Matched Words
+                    </div>
+                    <table className = "table table-sm table-bordered table-striped mt-1">
+                        <thead>
+                            <th>Word</th>
+                            <th>Score</th>
+                        </thead>
+                        <tbody>
+                            {
+                                this.props.words.map(
+                                    (value,index) => {
+                                    return (<tr key = {index}>
+                                                <td>{value}</td>
+                                                <td>{value.length}</td>
+                                            </tr>)
+                                }
+                            )}
+                        </tbody>
 
-                </table>
-
-            </div>
+                    </table>
+                </div>
             )
     }
 }

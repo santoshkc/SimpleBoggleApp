@@ -1,5 +1,5 @@
 const hostname = "localhost"
-const port = "8080"
+const port = "4000"
 
 const apiPart = "api/word"
 
