@@ -129,7 +129,7 @@ export class SimpleBoggleGame extends React.Component {
         if(response && response.status === 200) {
             let result = await response.json()
             let wordFound = result['WordFound'];
-            if(wordFound == true) {
+            if(wordFound === true) {
                 return true
             }
         }
@@ -217,9 +217,6 @@ export class SimpleBoggleGame extends React.Component {
 }
 
 class BannerComponent extends Component {
-    constructor(props) {
-        super(props)
-    }
 
     render = () => {
 
@@ -243,22 +240,17 @@ class BannerComponent extends Component {
 
 class BoardComponent extends Component {
 
-    constructor(props) {
-        super(props) 
-    }
-
     render = () => {
         const array  = this.props.board;
-        const rowSize = 4;
 
         return (
             <div className = "container">
                 {
                     array.map((rowArray,i) =>
-                        <div className = "row">
+                        <div key = {i} className = "row">
                             {
                                 rowArray.map( (v,j) =>
-                                    <BoardCell character = {v} />
+                                    <BoardCell key = {j} character = {v} />
                                 )
                             }
                         </div>
@@ -270,9 +262,6 @@ class BoardComponent extends Component {
 }
 
 class BoardCell extends Component {
-    constructor(props) {
-        super(props)
-    }
 
     render = () => {
         const style = {
@@ -288,10 +277,6 @@ class BoardCell extends Component {
 
 class MatchedWordListComponent extends Component {
 
-    constructor(props) {
-        super(props)
-    }
-
     render = () => {
         return (
                 <div className = "container-fluid">
@@ -300,8 +285,10 @@ class MatchedWordListComponent extends Component {
                     </div>
                     <table className = "table table-sm table-bordered table-striped mt-1">
                         <thead>
-                            <th>Word</th>
-                            <th>Score</th>
+                            <tr>
+                                <th>Word</th>
+                                <th>Score</th>
+                            </tr>
                         </thead>
                         <tbody>
                             {
