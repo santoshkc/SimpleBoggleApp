@@ -70,26 +70,26 @@ export class SimpleBoggleGame extends React.Component {
                 <div id = "gameInput" className = "row mt-2 p-2">
                         <form onSubmit = {this.wordValidation}>
                             <div className = "row">
-                                <input type = "text" onChange = { 
+                                <input type = "text" value = {this.state.inputWord || ""} onChange = { 
                                     (event) => {
                                         if(this.state.timeRemaining <= 0) {
                                             event.target.value = ""
-                                            this.setState({errorMessage : "Time up"})
+                                            this.setState({errorMessage : "Time is up"})
                                             return
                                         }
                                         let typedWord = event.target.value;
-                                        if(typedWord) {
-                                            typedWord = typedWord.trim().toLowerCase()
-                                            if(typedWord.length > 0)
-                                                this.setState({inputWord:  typedWord})
-                                        }
+                                        typedWord = typedWord.trim().toLowerCase()
+                                        this.setState({inputWord:  typedWord})
                                     }
                                 }/>
                                 <input type = "submit" value = "Check"/>
                             </div>
-                            <div className = {"row m-1" + this.state.errorMessage.length > 0 ? "bg-warn": ""}>
-                                <strong>{this.state.errorMessage}</strong>
-                            </div>
+                            { 
+                                this.state.errorMessage.length > 0 ? 
+                                    <div className = "row mt-1">
+                                        <strong>{this.state.errorMessage}</strong>
+                                    </div> : ""
+                            }
                         </form>
                 </div>
             </div>
@@ -102,14 +102,6 @@ export class SimpleBoggleGame extends React.Component {
             'typedText': wordToCheck,
         };
         
-        // var formBody = [];
-        // for (var property in details) {
-        //   var encodedKey = encodeURIComponent(property);
-        //   var encodedValue = encodeURIComponent(details[property]);
-        //   formBody.push(encodedKey + "=" + encodedValue);
-        // }
-        // formBody = formBody.join("&");
-
         //await new Promise(resolve => setTimeout(resolve,10000))
 
         let response = await fetch(RemoteServer,
@@ -205,6 +197,13 @@ export class SimpleBoggleGame extends React.Component {
         if(wordEntered.length < 3)
         {
             this.setInvalidWordError("Word should be of length 3 or more")
+            return
+        }
+
+        let alphabetPattern = "^[a-zA-Z]+$";
+        if(!wordEntered.match(alphabetPattern)) 
+        {
+            this.setInvalidWordError("Word should consists of only alphabets")
             return
         }
 
