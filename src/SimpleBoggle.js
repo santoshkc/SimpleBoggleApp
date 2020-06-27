@@ -12,7 +12,12 @@ export class SimpleBoggleGame extends React.Component {
     constructor(props) {
         super(props)
 
-        this.state = {
+        this.state = this.resetGameState()
+    }
+
+    resetGameState = () => {
+
+        let newState = {
             score: 0,
             gameBoard: new GameBoard(),
             matchedWords : [],
@@ -20,6 +25,7 @@ export class SimpleBoggleGame extends React.Component {
             errorMessage: "",
             timeRemaining : timeRemaining,
         }
+        return newState
     }
 
     componentDidMount  = () => {
@@ -65,6 +71,13 @@ export class SimpleBoggleGame extends React.Component {
                     </div>
                     <div id = "wordList" className = "col-3 ml-2">
                         <MatchedWordListComponent words = {this.state.matchedWords}/>
+                    </div>
+                    <div id = "gameReset" className = "col ml-2">
+                        <button className = "btn btn-dark" onClick = {(event) => {
+                            let initialState = this.resetGameState()
+                            this.setState(initialState)
+                        }}>Reset Game!</button>
+
                     </div>
                 </div>
                 <div id = "gameInput" className = "row mt-2">
