@@ -79,4 +79,84 @@ describe("Game Board", () => {
         expect(neighbours).toEqual([[0,0],[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[2,2]])
 
     });
+
+    test("Should check board occurences of characters", () => {
+
+        GameBoard.prototype.getInitializedBoard = () => {
+            let board = gameBoardInitializer()
+            board[3][2] = 'A'
+            return board
+        }
+
+        let gameBoard = new GameBoard()
+        expect(gameBoard.getAllBoardOccurences('A')).toEqual([[0,0],[3,2]])
+        expect(gameBoard.getAllBoardOccurences('O')).toEqual([])
+
+    });
+
+    test("Should check for valid move for non repeated characters in board", async () => {
+
+        GameBoard.prototype.getInitializedBoard = () => {
+            return gameBoardInitializer()
+        }
+
+        let gameBoard = new GameBoard()
+        
+        let validWord = "FBCGH"
+        expect(await gameBoard.checkIfMoveIsValid(validWord)).toEqual(true)
+
+        // horizontal
+        validWord = "ABCD"
+        expect(await gameBoard.checkIfMoveIsValid(validWord)).toEqual(true)
+
+        // diagonal
+        validWord = "AFKP"
+        expect(await gameBoard.checkIfMoveIsValid(validWord)).toEqual(true)
+
+        // vertical
+        validWord = "PLHD"
+        expect(await gameBoard.checkIfMoveIsValid(validWord)).toEqual(true)
+
+        // not adjacent cell
+        let invalidWord = "AIJ"
+        expect(await gameBoard.checkIfMoveIsValid(invalidWord)).toEqual(false)
+        invalidWord = "ABFEA"
+
+        // same cell repeated
+        expect(await gameBoard.checkIfMoveIsValid(invalidWord)).toEqual(false)
+        invalidWord = "ABFEA"
+    });
+
+    test("Should check for valid move for repeated letters in board", async () => {
+
+        GameBoard.prototype.getInitializedBoard = () => {
+            let board = gameBoardInitializer()
+            board[3][2] = 'A'
+            board[1][3] = 'E'
+            return board
+        }
+
+        let gameBoard = new GameBoard()
+        
+        // repeated A near bottom right cornor 
+        let validWord = "AKLP"
+        expect(await gameBoard.checkIfMoveIsValid(validWord)).toEqual(true)
+
+        // repeated E near top right cornor 
+        validWord = "EDCG"
+        expect(await gameBoard.checkIfMoveIsValid(validWord)).toEqual(true)
+
+        // repeated A with reused cell
+        let invalidWord = "AKLPA"
+        expect(await gameBoard.checkIfMoveIsValid(invalidWord)).toEqual(false)
+
+        // repeated A with J being invalid neighbour of P
+        invalidWord = "AKLPJ"
+        expect(await gameBoard.checkIfMoveIsValid(invalidWord)).toEqual(false)
+
+        // repeated E with A being invalid neighbour of G
+        invalidWord = "EDCGA"
+        expect(await gameBoard.checkIfMoveIsValid(invalidWord)).toEqual(false)
+    });
+
   });
