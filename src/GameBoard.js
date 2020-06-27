@@ -15,7 +15,15 @@ export class GameBoard {
         )
     }
 
-    getInitializedBoard(sizeOfGrid) {
+    getInitializedBoard(sizeOfBoardRow) {
+        let duplicate = true;
+        if(duplicate)
+            return this.getInitializedBoardWithDuplicateCharacter(this.sizeOfBoardRow)
+        else
+            return this.getInitializedBoardInternal(this.sizeOfBoardRow)
+    }
+
+    getInitializedBoardInternal(sizeOfGrid) {
 
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const randomizedAlphabetArray = alphabet.split('').sort( () => (Math.random()-0.5));
@@ -115,70 +123,73 @@ export class GameBoard {
     }
 
     checkIfMoveIsValid = async (word) => {
+        return this.isValid(word)
+    }
 
-        let wordToCheck = word.toLowerCase()
+    isValidRecursive(headIndex,tail,visitedParentCells) {
 
-        let indexes = this.getAllBoardOccurences(wordToCheck[0])
-        if(!indexes)
-            return false
+        let immediateNeighbours = this.getNearestNeighbourFromIndex(headIndex)
+        
+        // copy parent visited data and append current cell as visited
+        let visitedCells = [...visitedParentCells,headIndex]
 
-        for(let loopIndex = 0; loopIndex < indexes.length; loopIndex++) {
-            let alreadyUsedCells = []
-            let isMoveValid = true;
-            let firstCharacterIndex = indexes[loopIndex]
-            for(let i = 0; i < wordToCheck.length -1 ; i++) {
-                // could not find character in the board
-                let indexArray = i === 0 ? firstCharacterIndex : this.indexFromCharacter(wordToCheck.charAt(i));
-                if(!indexArray) {
-                    isMoveValid = false;
-                    break;
-                }
-                let [currentCharRow,currentCharColumn] = indexArray;
+        let isSubStringValid = false;
+        
+        for(let j = 0; j < immediateNeighbours.length; j++) {
+            let neighbour = immediateNeighbours[j]
+            let neighbourIndex = this.rowColumnToIndex(...neighbour)
 
-                // this will check if same cell is used more than once
-                let actualArrayIndex = this.rowColumnToIndex(...indexArray)
-                if(alreadyUsedCells.includes(actualArrayIndex)) {
-                    isMoveValid = false;
-                    break;
-                }
-                alreadyUsedCells.push(actualArrayIndex)
-                
-                let nextChar = wordToCheck.charAt(i+1)
-                // could not find next character in the board
-                let indexArray2 = this.indexFromCharacter(nextChar)
-                if(!indexArray2) {
-                    isMoveValid = false;
-                    break;
-                }
-                let [nextCharRow,nextCharColumn] = indexArray2;
+            let neighbourChar = this.getCharacterFromIndex(neighbourIndex)
 
-                // check whether last cell is repeated
-                if(i+1 === wordToCheck.length - 1) {
-                    // this will check if same cell is used more than once
-                    let actualArrayIndex = this.rowColumnToIndex(...indexArray2)
-                    if(alreadyUsedCells.includes(actualArrayIndex)) {
-                        isMoveValid = false;
-                        break;
-                    }
-                    alreadyUsedCells.push(actualArrayIndex)
+            if(neighbourChar.toLowerCase() === tail[0].toLowerCase()) {
+
+                //already visited neighbour found
+                // so ignore this neighbour
+                if( visitedCells.includes(neighbourIndex) )
+                    continue
+
+                if(tail.length === 1) {
+                    // no more letters available
+                    // so given move is valid
+                    isSubStringValid = true
+                } else {
+                    let newTail = tail.substring(1)
+                    isSubStringValid = this.isValidRecursive(neighbourIndex,newTail,visitedCells)
                 }
 
-                let neighbours = this.getNearestNeighbour(currentCharRow,currentCharColumn)
-
-                var existsInNeighbourhood = neighbours.some( (value,index) => {
-                    let [r,c] = value
-                    return  r === nextCharRow && c === nextCharColumn
-                })
-
-                // next character not in neighbour
-                if(!existsInNeighbourhood) {
-                    isMoveValid = false
-                    break;
-                }
+                if(isSubStringValid)
+                    return true
             }
-            if(isMoveValid === true)
+        }
+        return false
+    }
+
+    isValid(word) {
+        let head = word[0]
+        let tail = word.substr(1)
+
+        let headOccurencesOnBoard = this.getAllBoardOccurences(head);
+
+        for(let i = 0; i < headOccurencesOnBoard.length; i++) {
+
+            let currentOccurence = headOccurencesOnBoard[i]
+            let headIndex = this.rowColumnToIndex(...currentOccurence)
+
+            if(this.isValidRecursive(headIndex,tail,[]))
                 return true
         }
         return false
+    }
+
+    getCharacterFromIndex(index) {
+        let [row,column] = this.indexToRowColumn(index)
+        return this.board[row][column]
+    }
+
+    getNearestNeighbourFromIndex(index) {
+
+        let [row,column] = this.indexToRowColumn(index)
+        let neighbours = this.getNearestNeighbour(row,column)
+        return neighbours
     }
 }

@@ -120,11 +120,13 @@ describe("Game Board", () => {
         // not adjacent cell
         let invalidWord = "AIJ"
         expect(await gameBoard.checkIfMoveIsValid(invalidWord)).toEqual(false)
-        invalidWord = "ABFEA"
-
+        
         // same cell repeated
-        expect(await gameBoard.checkIfMoveIsValid(invalidWord)).toEqual(false)
         invalidWord = "ABFEA"
+        expect(await gameBoard.checkIfMoveIsValid(invalidWord)).toEqual(false)
+        
+        invalidWord = "KGHLKJ"
+        expect(await gameBoard.checkIfMoveIsValid(invalidWord)).toEqual(false)
     });
 
     test("Should check for valid move for repeated letters in board", async () => {
@@ -157,6 +159,29 @@ describe("Game Board", () => {
         // repeated E with A being invalid neighbour of G
         invalidWord = "EDCGA"
         expect(await gameBoard.checkIfMoveIsValid(invalidWord)).toEqual(false)
+    });
+
+    test("Hello world", () => {
+
+        GameBoard.prototype.getInitializedBoard = () => {
+            let board = [['F','A','T',],
+                         ['A','A','X',],
+                         ['M','I','N',],
+                        ]
+            return board
+        }
+
+        let gameBoard = new GameBoard(3)
+        let word = "FAN"
+        // expect(gameBoard.isValid(word)).toEqual(true)
+
+        word = "FAAAN"
+        expect(gameBoard.isValid(word)).toEqual(true)
+
+        //word = "FANFN"
+        word = "FDOFND"
+        expect(gameBoard.isValid(word)).toEqual(false)
+
     });
 
   });
