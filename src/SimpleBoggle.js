@@ -67,7 +67,7 @@ export class SimpleBoggleGame extends React.Component {
                         <MatchedWordListComponent words = {this.state.matchedWords}/>
                     </div>
                 </div>
-                <div id = "gameInput" className = "row mt-2 p-2">
+                <div id = "gameInput" className = "row mt-2">
                         <form onSubmit = {this.wordValidation}>
                             <div className = "row">
                                 <input type = "text" value = {this.state.inputWord || ""} onChange = { 
@@ -82,13 +82,13 @@ export class SimpleBoggleGame extends React.Component {
                                         this.setState({inputWord:  typedWord})
                                     }
                                 }/>
-                                <input type = "submit" value = "Check"/>
+                                <input className = "btn btn-dark ml-2" type = "submit" value = "Check"/>
                             </div>
                             { 
                                 this.state.errorMessage.length > 0 ? 
-                                    <div className = "row mt-1">
+                                    <div className = "row mt-1 text-danger">
                                         <strong>{this.state.errorMessage}</strong>
-                                    </div> : ""
+                                    </div> : <div></div>
                             }
                         </form>
                 </div>
