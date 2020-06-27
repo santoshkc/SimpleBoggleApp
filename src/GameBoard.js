@@ -1,7 +1,8 @@
 const sizeOfBoardRow = 4;
 
 export class GameBoard {
-    constructor() {
+    constructor(sizeOfBoardRow = 4) {
+        this.sizeOfBoardRow = sizeOfBoardRow;
         this.board = this.getInitializedBoard(sizeOfBoardRow)
     }
 
@@ -57,10 +58,10 @@ export class GameBoard {
     }
 
     indexFromCharacter = (character) => {
-        for(let i = 0; i < sizeOfBoardRow; i++) {
-            for(let j = 0; j < sizeOfBoardRow; j++) {
+        for(let i = 0; i < this.sizeOfBoardRow; i++) {
+            for(let j = 0; j < this.sizeOfBoardRow; j++) {
                 let value = this.board[i][j]
-                if(value.toLowerCase() === character)
+                if(value.toLowerCase() === character.toLowerCase())
                     return [i,j]
             }
         }
@@ -68,25 +69,25 @@ export class GameBoard {
     }
 
     indexToRowColumn = (index) => {
-        let row = Math.floor( (index+1)/sizeOfBoardRow)
-        let column = index%sizeOfBoardRow
+        let row = Math.floor( (index)/this.sizeOfBoardRow)
+        let column = index%this.sizeOfBoardRow
         return [row,column]
     }
 
     rowColumnToIndex = (row,column) => {
-        return row*sizeOfBoardRow + column
+        return row*this.sizeOfBoardRow + column
     }
 
     getNearestNeighbour =  (row,column) => {
         let result = []
 
         for(let i = row-1; i <= row+1; i++) {
-            if(i < 0 || i >  (sizeOfBoardRow - 1)) {
+            if(i < 0 || i >  (this.sizeOfBoardRow - 1)) {
                 continue;
             }
         
             for(let j = column-1; j <= column+1; j++) {
-                if(j < 0 || j > sizeOfBoardRow - 1) {
+                if(j < 0 || j > this.sizeOfBoardRow - 1) {
                     continue;
                 }
 
