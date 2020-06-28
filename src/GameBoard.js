@@ -46,6 +46,11 @@ class BoardGenerator {
     }
 }
 
+// Encapsulates logic related to gameboard like:
+// Calculating all occurences of characters in board. 
+// Calculating nearest neighbours of given cell.
+// Checking whether give move is valid or not
+//
 export class GameBoard {
     constructor(sizeOfBoardRow = 4) {
         this.sizeOfBoardRow = sizeOfBoardRow;
@@ -62,6 +67,7 @@ export class GameBoard {
     }
 
     getInitializedBoard(sizeOfBoardRow) {
+        // use dice based generator
         let boardGenerator = new BoardGenerator()
         return boardGenerator.generate()
         // let duplicate = true;
@@ -111,17 +117,6 @@ export class GameBoard {
         }
         return numbers;
 
-    }
-
-    indexFromCharacter = (character) => {
-        for(let i = 0; i < this.sizeOfBoardRow; i++) {
-            for(let j = 0; j < this.sizeOfBoardRow; j++) {
-                let value = this.board[i][j]
-                if(value.toLowerCase() === character.toLowerCase())
-                    return [i,j]
-            }
-        }
-        return null;
     }
 
     indexToRowColumn = (index) => {
@@ -212,6 +207,7 @@ export class GameBoard {
         return false
     }
 
+    // checks whether give move is valid or not
     isValid(word) {
         let head = word[0]
         let tail = word.substr(1)

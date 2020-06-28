@@ -194,7 +194,7 @@ export class SimpleBoggleGame extends React.Component {
         event.preventDefault()
 
         if(this.state.timeRemaining <= 0) {
-            this.setInvalidWordError("Time up")
+            this.setInvalidWordError("Time is up")
             return
         }
 
