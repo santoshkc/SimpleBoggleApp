@@ -1,5 +1,51 @@
 const sizeOfBoardRow = 4;
 
+class BoardGenerator {
+    constructor() {
+        this.sizeOfBoardRow = 4
+        // dice config for english
+        // https://boardgames.stackexchange.com/questions/29264/boggle-what-is-the-dice-configuration-for-boggle-in-various-languages
+        this.dices = [
+        "RIFOBX", //0
+        "IFEHEY", //1
+        "DENOWS", //2
+        "UTOKND", //3
+        "HMSRAO", //4
+        "LUPETS", //5
+        "ACITOA", //6
+        "YLGKUE", //7
+        "QBMJOA", //8
+        "EHISPN", //9
+        "VETIGN", //10
+        "BALIYT", //11
+        "EZAVND", //12
+        "RALESC", //13
+        "UWILRG", //14
+        "PACEMD" //15
+        ]
+    }
+
+    generate() {
+        let numbers = [];
+
+        for (let row = 0; row < this.sizeOfBoardRow; row++) {
+            let subArray = Array(this.sizeOfBoardRow);
+
+            for(let column = 0; column < this.sizeOfBoardRow; column++) {
+                let dice = this.dices[row*this.sizeOfBoardRow + column]
+
+                let randomIndex = Math.floor(Math.random()*6)
+                
+                let randomChar = dice.charAt(randomIndex);
+
+                subArray[column] = randomChar;
+            }
+            numbers.push(subArray);
+        }
+        return numbers;
+    }
+}
+
 export class GameBoard {
     constructor(sizeOfBoardRow = 4) {
         this.sizeOfBoardRow = sizeOfBoardRow;
@@ -16,11 +62,13 @@ export class GameBoard {
     }
 
     getInitializedBoard(sizeOfBoardRow) {
-        let duplicate = true;
-        if(duplicate)
-            return this.getInitializedBoardWithDuplicateCharacter(this.sizeOfBoardRow)
-        else
-            return this.getInitializedBoardInternal(this.sizeOfBoardRow)
+        let boardGenerator = new BoardGenerator()
+        return boardGenerator.generate()
+        // let duplicate = true;
+        // if(duplicate)
+        //     return this.getInitializedBoardWithDuplicateCharacter(this.sizeOfBoardRow)
+        // else
+        //     return this.getInitializedBoardInternal(this.sizeOfBoardRow)
     }
 
     getInitializedBoardInternal(sizeOfGrid) {
