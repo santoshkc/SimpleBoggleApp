@@ -67,7 +67,12 @@ export class SimpleBoggleGame extends React.Component {
                 </div>
                 <div className = "row p-2 mt-2">
                     <div id = "board" className = "col-4">
-                        <BoardComponent board = {this.state.gameBoard.board}/>
+                        <BoardComponent board = {this.state.gameBoard.board}
+                            onCallback = {(txt) => {
+                                let input = this.state.inputWord + txt
+                                this.setState({inputWord: input})
+                            }}
+                        />
                     </div>
                     <div id = "wordList" className = "col-3 ml-2">
                         <MatchedWordListComponent words = {this.state.matchedWords}/>
@@ -262,7 +267,8 @@ class BoardComponent extends Component {
                         <div key = {i} className = "row">
                             {
                                 rowArray.map( (v,j) =>
-                                    <BoardCell key = {j} character = {v} />
+                                    <BoardCell key = {j} character = {v} 
+                                        onCallback = {this.props.onCallback} />
                                 )
                             }
                         </div>
@@ -282,7 +288,11 @@ class BoardCell extends Component {
         }
         const value = this.props.character
         return (
-            <button style = {style} className = "btn btn-light m-1 p-1" >{value}</button>
+            <button style = {style} className = "btn btn-light m-1 p-1" 
+                onClick = {(event) => {
+                    this.props.onCallback(value)
+                }}
+            >{value}</button>
         )
     }
 }
