@@ -24,12 +24,14 @@ export class SimpleBoggleGame extends React.Component {
             inputWord: "",
             errorMessage: "",
             timeRemaining : timeRemaining,
+            timerId : null,
+            isPaused : false,
         }
         return newState
     }
 
     componentDidMount  = () => {
-        this.runTimer()
+        this.resetTimer()
     }
 
     getCurrentScore = () => {
@@ -40,21 +42,21 @@ export class SimpleBoggleGame extends React.Component {
         return sum
     }
 
-    runTimer = () => {
-
-        if(this.state.timeRemaining > 0) {        
-            
-            let timerId = setInterval( () => {
-                let currentTimerValue = this.state.timeRemaining;
-
-                if(currentTimerValue <= 0) {
-                    clearInterval(timerId)
-                    this.setState({timeRemaining: 0})
-                    return
-                }
+    // Resets the timer that runs every second
+    // to decrement remaining time.
+    resetTimer() {
+        
+        let timerId = setInterval( () => {
+            let currentTimerValue = this.state.timeRemaining;
+            if(currentTimerValue <= 0) {
+                clearInterval(timerId)
+                this.setState({timeRemaining: 0})
+                return
+            }
+            if(!this.state.isPaused)
                 this.setState({timeRemaining: currentTimerValue - 1})
-                },1000);
-        }
+        },1000);
+        this.setState({timerId : timerId})
     }
 
     render = () => {
@@ -78,17 +80,28 @@ export class SimpleBoggleGame extends React.Component {
                         <MatchedWordListComponent words = {this.state.matchedWords}/>
                     </div>
                     <div id = "gameReset" className = "col ml-2">
-                        <button className = "btn btn-dark" onClick = {(event) => {
-                            let initialState = this.resetGameState()
-                            this.setState(initialState)
-                        }}>Reset Game!</button>
+                        <div className = "row mt-1">
+                            <button className = "btn btn-dark ml-1" onClick = {(event) => {
+                                if(this.state.timerId) {
+                                    clearInterval(this.state.timerId)
+                                }
+                                let initialState = this.resetGameState()
+                                this.setState(initialState)
+                                this.resetTimer()
+                            }}>Reset Game!</button>
+                        </div>
+                        <div className = "row mt-2">
+                            <button className = "btn btn-dark ml-1" onClick = {(event) => {
+                                this.setState({isPaused : !this.state.isPaused})
+                            }}>{ this.state.isPaused ? "Pause" : "Resume"} Game!</button>
+                        </div>
 
                     </div>
                 </div>
                 <div id = "gameInput" className = "row mt-2">
                         <form onSubmit = {this.wordValidation}>
                             <div className = "row">
-                                <input type = "text" value = {this.state.inputWord || ""} onChange = { 
+                                <input type = "text" value = {this.state.inputWord.toUpperCase() || ""} onChange = { 
                                     (event) => {
                                         if(this.state.timeRemaining <= 0) {
                                             event.target.value = ""
