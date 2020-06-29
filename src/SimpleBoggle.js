@@ -91,9 +91,9 @@ export class SimpleBoggleGame extends React.Component {
                             }}>Reset Game!</button>
                         </div>
                         <div className = "row mt-2">
-                            <button className = "btn btn-dark ml-1" onClick = {(event) => {
+                            <button className = { "btn ml-1 " + (!this.state.isPaused ? "btn-dark" : "btn-light")} onClick = {(event) => {
                                 this.setState({isPaused : !this.state.isPaused})
-                            }}>{ this.state.isPaused ? "Pause" : "Resume"} Game!</button>
+                            }}>{ !this.state.isPaused ? "Pause" : "Resume"} Game!</button>
                         </div>
 
                     </div>
