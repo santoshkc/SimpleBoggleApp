@@ -103,6 +103,11 @@ export class SimpleBoggleGame extends React.Component {
                             <div className = "row">
                                 <input type = "text" value = {this.state.inputWord.toUpperCase() || ""} onChange = { 
                                     (event) => {
+                                        if(this.state.isPaused) {
+                                            event.target.value = ""
+                                            this.setState({errorMessage : "Resume the game first"})
+                                            return
+                                        }
                                         if(this.state.timeRemaining <= 0) {
                                             event.target.value = ""
                                             this.setState({errorMessage : "Time is up"})
@@ -205,6 +210,11 @@ export class SimpleBoggleGame extends React.Component {
 
     wordValidation = async (event) => {
         event.preventDefault()
+
+        if(this.state.isPaused) {
+            this.setInvalidWordError("Resume the game first")
+            return
+        }
 
         if(this.state.timeRemaining <= 0) {
             this.setInvalidWordError("Time is up")
